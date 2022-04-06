@@ -2,11 +2,11 @@
 - name: Configure nginx web server
   hosts: webserver
   tasks:
-  - name: uninstall nginx server
+  - name: install nginx server
     apt:
-      name: nginx=1.18*
-      state: absent
-  - name: stop nginx server
+      name: nginx
+      state: latest
+  - name: start nginx server
     service:
       name: nginx
-      state: stopped
+      state: start
