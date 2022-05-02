@@ -1,49 +1,45 @@
 ---
 - name: Install node and npm
-  hosts: 159.89.1.54
+  hosts: 178.62.225.101
   tasks:
     - name: Update apt repo and cache
-      ansible.builtin.apt: update_cache=yes force_apt_get=yes cache_valid_time=3600
+      apt: update_cache=yes force_apt_get=yes cache_valid_time=3600
     - name: Install nodejs and npm
-      ansible.builtin.apt: 
+      apt:
         pkg:
           - nodejs
           - npm
 
 
 - name: Create new linux user for node app
-  hosts: 159.89.1.54    
-  vars_files:
-    - project-vars  
+  hosts: 178.62.225.101
   tasks:
     - name: Create linux user
-      ansible.builtin.user:
-        name: "{{linux_name}}"
+      user:
+        name: antoine
         comment: Node User
         group: admin
 
 
 - name: Deploy nodejs app
-  hosts: 159.89.1.54
+  hosts: 178.62.225.101
   become: True
-  become_user: "{{linux_name}}"
-  vars_files:
-    - project-vars
+  become_user: antoine
   tasks:
     - name: Unpack the nodejs file
-      ansible.builtin.unarchive:
-        src: "{{location}}/nodejs-app-{{version}}.tgz"
-        dest: "{{user_home_dir}}"
+      unarchive:
+        src: /home/laptopuser/Downloads/node-app-c-main/nodejs-app-1.0.0.tgz
+        dest: /home/antoine
     - name: Install dependencies
-      community.general.npm:
-        path: "{{user_home_dir}}/package"
+      npm:
+        path: /home/antoine/package
     - name: Start the application
-      ansible.builtin.command: 
-        chdir: "{{user_home_dir}}/package/app"
+      command:
+        chdir: /home/antoine/package/app
         cmd: node server
       async: 1000
-      poll: 0  
+      poll: 0
     - name: Ensure app is running
-      ansible.builtin.shell: ps aux | grep node
+      shell: ps aux | grep node
       register: app_status
-    - ansible.builtin.debug: msg={{app_status.stdout_lines}}
+    - debug: msg={{app_status.stdout_lines}}
